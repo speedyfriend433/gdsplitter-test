@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GD Level Splitter</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --accent-color: #7289da;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-section {
+            border: 2px dashed var(--accent-color);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .custom-upload-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .custom-upload-btn:hover {
+            opacity: 0.8;
+        }
+
+        .split-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .output-section {
+            display: none;
+        }
+
+        .part-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .part-item {
+            background-color: #2a2a2a;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GD Level Splitter</h1>
+        
+        <div class="upload-section">
+            <input type="file" id="file-input" accept=".txt">
+            <label for="file-input" class="custom-upload-btn">
+                Upload Level File
+            </label>
+            <p>or drag and drop files here</p>
+        </div>
+
+        <div class="split-controls">
+            <input type="number" id="part-count" min="2" max="10" value="2">
+            <button onclick="splitLevel()">Split Level</button>
+        </div>
+
+        <div class="output-section" id="output-section">
+            <h2>Split Parts</h2>
+            <ul class="part-list" id="part-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        let currentFile = null;
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            currentFile = e.target.files[0];
+        });
+
+        const dropZone = document.querySelector('.upload-section');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#2a2a2a';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'transparent';
+            currentFile = e.dataTransfer.files[0];
+        });
+
+        function splitLevel() {
+            if (!currentFile) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const partCount = document.getElementById('part-count').value;
+                const parts = splitContent(content, partCount);
+                displayParts(parts);
+            };
+            reader.readAsText(currentFile);
+        }
+
+        function splitContent(content, partCount) {
+
+            const partLength = Math.ceil(content.length / partCount);
+            const parts = [];
+            
+            for (let i = 0; i < partCount; i++) {
+                const start = i * partLength;
+                const end = start + partLength;
+                parts.push(content.slice(start, end));
+            }
+            
+            return parts;
+        }
+
+        function displayParts(parts) {
+            const partList = document.getElementById('part-list');
+            partList.innerHTML = '';
+            
+            parts.forEach((part, index) => {
+                const li = document.createElement('li');
+                li.className = 'part-item';
+                li.innerHTML = `
+                    <span>Part ${index + 1}</span>
+                    <button onclick="downloadPart(${index})">Download</button>
+                `;
+                partList.appendChild(li);
+            });
+
+            document.getElementById('output-section').style.display = 'block';
+        }
+
+        function downloadPart(index) {
+            const blob = new Blob([parts[index]], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `part_${index + 1}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
