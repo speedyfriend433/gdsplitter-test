@@ -3,189 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GD Level Splitter</title>
+    <title>Modern GD Icon Processor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plist/3.0.5/plist.js"></script>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --accent-color: #7289da;
-            --text-color: #ffffff;
+            --primary-gradient: linear-gradient(135deg, #7289da, #4361ee);
+            --background: #1a1a1f;
+            --card-bg: #2a2a35;
+            --text-primary: #ffffff;
+            --accent: #7289da;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .upload-section {
-            border: 2px dashed var(--accent-color);
-            padding: 2rem;
-            text-align: center;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        .custom-upload-btn {
-            background-color: var(--accent-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        .custom-upload-btn:hover {
-            opacity: 0.8;
-        }
-
-        .split-controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .output-section {
-            display: none;
-        }
-
-        .part-list {
-            list-style: none;
             padding: 0;
         }
 
-        .part-item {
-            background-color: #2a2a2a;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 5px;
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px dashed rgba(114, 137, 218, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-label {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .icon-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .icon-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .icon-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GD Level Splitter</h1>
-        
+        <header class="header">
+            <h1 class="title">GD Icon Workshop</h1>
+            <p>Modern spritesheet processor for Geometry Dash</p>
+        </header>
+
         <div class="upload-section">
-            <input type="file" id="file-input" accept=".txt">
-            <label for="file-input" class="custom-upload-btn">
-                Upload Level File
+            <input type="file" id="plistFile" class="file-input" accept=".plist">
+            <input type="file" id="pngFile" class="file-input" accept=".png">
+            <label for="plistFile" class="upload-label">
+                <div class="upload-icon">📁</div>
+                <span>Upload .plist and .png files</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
             </label>
-            <p>or drag and drop files here</p>
         </div>
 
-        <div class="split-controls">
-            <input type="number" id="part-count" min="2" max="10" value="2">
-            <button onclick="splitLevel()">Split Level</button>
+        <div class="controls">
+            <button class="btn" onclick="processFiles()">Process Files</button>
+            <button class="btn" onclick="exportIcons()">Export All</button>
         </div>
 
-        <div class="output-section" id="output-section">
-            <h2>Split Parts</h2>
-            <ul class="part-list" id="part-list"></ul>
-        </div>
+        <div class="preview-container" id="previewContainer"></div>
     </div>
 
     <script>
-        let currentFile = null;
+        let plistData = null;
+        let spritesheet = null;
 
-        document.getElementById('file-input').addEventListener('change', function(e) {
-            currentFile = e.target.files[0];
-        });
+        document.getElementById('plistFile').addEventListener('change', handleFileSelect);
+        document.getElementById('pngFile').addEventListener('change', handleFileSelect);
 
-        const dropZone = document.querySelector('.upload-section');
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = '#2a2a2a';
-        });
+        async function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = 'transparent';
-        });
+            const progress = document.getElementById('progress');
+            progress.style.width = `${(e.loaded / e.total) * 100}%`;
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.backgroundColor = 'transparent';
-            currentFile = e.dataTransfer.files[0];
-        });
+            if (file.name.endsWith('.plist')) {
+                const text = await file.text();
+                plistData = plist.parse(text);
+            } else if (file.name.endsWith('.png')) {
+                spritesheet = await createImageBitmap(file);
+            }
+        }
 
-        function splitLevel() {
-            if (!currentFile) {
-                alert('Please select a file first!');
+        function processFiles() {
+            if (!plistData || !spritesheet) {
+                alert('Please upload both .plist and .png files!');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                const partCount = document.getElementById('part-count').value;
-                const parts = splitContent(content, partCount);
-                displayParts(parts);
-            };
-            reader.readAsText(currentFile);
-        }
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = '';
 
-        function splitContent(content, partCount) {
+            Object.entries(plistData.frames).forEach(([name, frame]) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = frame.frame.width;
+                canvas.height = frame.frame.height;
 
-            const partLength = Math.ceil(content.length / partCount);
-            const parts = [];
-            
-            for (let i = 0; i < partCount; i++) {
-                const start = i * partLength;
-                const end = start + partLength;
-                parts.push(content.slice(start, end));
-            }
-            
-            return parts;
-        }
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(
+                    spritesheet,
+                    frame.frame.x,
+                    frame.frame.y,
+                    frame.frame.width,
+                    frame.frame.height,
+                    0,
+                    0,
+                    frame.frame.width,
+                    frame.frame.height
+                );
 
-        function displayParts(parts) {
-            const partList = document.getElementById('part-list');
-            partList.innerHTML = '';
-            
-            parts.forEach((part, index) => {
-                const li = document.createElement('li');
-                li.className = 'part-item';
-                li.innerHTML = `
-                    <span>Part ${index + 1}</span>
-                    <button onclick="downloadPart(${index})">Download</button>
+                const card = document.createElement('div');
+                card.className = 'icon-card';
+                card.innerHTML = `
+                    <img src="${canvas.toDataURL()}" class="icon-image">
+                    <p>${name}</p>
                 `;
-                partList.appendChild(li);
-            });
 
-            document.getElementById('output-section').style.display = 'block';
+                previewContainer.appendChild(card);
+            });
         }
 
-        function downloadPart(index) {
-            const blob = new Blob([parts[index]], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `part_${index + 1}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
+        function exportIcons() {
+            alert('Export functionality would go here!');
+        }
+
+        const dropZone = document.querySelector('.upload-section');
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = var(--accent);
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            // Handle
         }
     </script>
 </body>
